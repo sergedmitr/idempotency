@@ -22,6 +22,7 @@ public class Order {
 	Timeslot delivery;
 	OrderStatuses status;
 	Long userId;
+	Long deliveryId;
 
 	public Long getOrderId() {
 		return orderId;
@@ -79,6 +80,14 @@ public class Order {
 		this.userId = userId;
 	}
 
+	public Long getDeliveryId() {
+		return deliveryId;
+	}
+
+	public void setDeliveryId(Long deliveryId) {
+		this.deliveryId = deliveryId;
+	}
+
 	@Override
 	public String toString() {
 		return "Order{" +
@@ -88,6 +97,7 @@ public class Order {
 				", price=" + price +
 				", delivery=" + delivery +
 				", userId=" + userId +
+				", deliveryId=" + deliveryId +
 				'}';
 	}
 }

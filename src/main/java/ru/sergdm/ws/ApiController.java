@@ -167,6 +167,7 @@ public class ApiController {
 				delivery.setCourierId("af-32");
 				delivery.setTimeslot(order.getDelivery());
 				Delivery deliveryNew = deliveryClient.scheduleDelivery(delivery);
+				order.setDeliveryId(deliveryNew.getDeliveryId());
 				logger.info("processOrder. delivery = {}", deliveryNew);
 			} catch (FeignException ex) {
 				logger.error("Delivery error. ex ={}", ex.getMessage(), ex);
