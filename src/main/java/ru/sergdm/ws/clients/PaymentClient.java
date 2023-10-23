@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import ru.sergdm.ws.clients.model.MoneyMove;
 import ru.sergdm.ws.clients.model.ReturnRequest;
 
-@FeignClient(name = "PaymentClient", url="${PAYMENT_URL}:8010")
+@FeignClient(name = "PaymentClient", url="${PAYMENTS_URL}:8010")
 public interface PaymentClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/pay/{userId}", consumes = "application/json")
 	MoneyMove doPayment(@PathVariable("userId") Long userId, MoneyMove moneyMove);
