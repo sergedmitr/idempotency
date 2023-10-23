@@ -3,6 +3,7 @@ package ru.sergdm.ws.service;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.sergdm.ws.enums.OrderStatuses;
 import ru.sergdm.ws.exception.BadResourceException;
 import ru.sergdm.ws.exception.ResourceAlreadyExistsException;
 import ru.sergdm.ws.exception.ResourceNotExpectedException;
@@ -44,6 +45,7 @@ public class OrderService {
 			if (reservedOrder.getProduct() != null) {
 				return reservedOrder;
 			}
+			order.setStatus(OrderStatuses.CREATED);
 			return orderRepository.save(order);
 		} else {
 			BadResourceException exc = new BadResourceException("Failed to save order");
@@ -54,7 +56,18 @@ public class OrderService {
 
 	public OrderReserve reserve() {
 		Order order = new Order();
+		order.setStatus(OrderStatuses.RESERVED);
 		Order orderNew = orderRepository.save(order);
 		return new OrderReserve(orderNew.getOrderId());
+	}
+
+	public OrderReserve setProcessed(Order order) {
+		order.setStatus(OrderStatuses.PROCESSED);
+		Order orderNew = orderRepository.save(order);
+		return new OrderReserve(orderNew.getOrderId());
+	}
+
+	public void deleteAll() {
+		orderRepository.deleteAll();
 	}
 }
