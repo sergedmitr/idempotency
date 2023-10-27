@@ -1,5 +1,6 @@
 package ru.sergdm.ws.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,8 @@ public class Order {
 	OrderStatuses status;
 	Long userId;
 	Long deliveryId;
+	Long accountId;
+	Long reserveId;
 
 	public Long getOrderId() {
 		return orderId;
@@ -88,6 +91,22 @@ public class Order {
 		this.deliveryId = deliveryId;
 	}
 
+	public Long getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(Long accountId) {
+		this.accountId = accountId;
+	}
+
+	public Long getReserveId() {
+		return reserveId;
+	}
+
+	public void setReserveId(Long reserveId) {
+		this.reserveId = reserveId;
+	}
+
 	@Override
 	public String toString() {
 		return "Order{" +
@@ -98,6 +117,8 @@ public class Order {
 				", delivery=" + delivery +
 				", userId=" + userId +
 				", deliveryId=" + deliveryId +
+				", accountId=" + accountId +
+				", reserveId=" + reserveId +
 				'}';
 	}
 }

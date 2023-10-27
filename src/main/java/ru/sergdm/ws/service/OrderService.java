@@ -67,6 +67,12 @@ public class OrderService {
 		return new OrderReserve(orderNew.getOrderId());
 	}
 
+	public OrderReserve setCompleted(Order order) {
+		order.setStatus(OrderStatuses.COMPLETED);
+		Order orderNew = orderRepository.save(order);
+		return new OrderReserve(orderNew.getOrderId());
+	}
+
 	public void deleteAll() {
 		orderRepository.deleteAll();
 	}

@@ -3,12 +3,10 @@ package ru.sergdm.ws.clients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import ru.sergdm.ws.clients.model.ConfirmRequest;
 import ru.sergdm.ws.clients.model.Delivery;
-import ru.sergdm.ws.clients.model.MoneyMove;
 
 import java.util.List;
 
@@ -19,4 +17,7 @@ public interface DeliveryClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/deliveries", consumes = "application/json")
 	Delivery scheduleDelivery(Delivery delivery);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/confirm", consumes = "application/json")
+	void confirmDelivery(ConfirmRequest confirmRequest);
 }

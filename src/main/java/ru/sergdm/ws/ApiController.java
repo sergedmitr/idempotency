@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.sergdm.ws.clients.DeliveryClient;
 import ru.sergdm.ws.clients.PaymentClient;
 import ru.sergdm.ws.clients.WarehouseClient;
+import ru.sergdm.ws.clients.model.ConfirmRequest;
 import ru.sergdm.ws.clients.model.Delivery;
 import ru.sergdm.ws.clients.model.MoneyMove;
 import ru.sergdm.ws.clients.model.Reserve;
@@ -117,6 +118,43 @@ public class ApiController {
 		}
 	}
 
+	@PostMapping(value = "/orders/complete/{orderId}")
+	public ResponseEntity<?> completeOrder(@PathVariable Long orderId) {
+		try {
+			logger.info("processOrder. orderId = " + orderId);
+			Order order = orderService.findById(orderId);
+			if (order.getStatus() != OrderStatuses.PROCESSED) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(orderId);
+			}
+			try {
+				// ship Reserve
+				ShipmentRequest shipmentRequest = new ShipmentRequest();
+				shipmentRequest.setOrderId(order.getOrderId());
+				shipmentRequest.setReserveId(order.getReserveId());
+				warehouseClient.shipRequest(shipmentRequest);
+				logger.info("reserve shipped");
+			} catch (FeignException ex) {
+				logger.error("Warehouse error. ex = {}", ex.getMessage(), ex);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+			}
+			try {
+				// confirm Delivery
+				ConfirmRequest confirmRequest = new ConfirmRequest();
+				confirmRequest.setOrderId(order.getOrderId());
+				confirmRequest.setDeliveryId(order.getDeliveryId());
+				deliveryClient.confirmDelivery(confirmRequest);
+				logger.info("delivery completed");
+				orderService.setCompleted(order);
+				return ResponseEntity.ok(order);
+			} catch (FeignException ex) {
+				logger.error("Warehouse error. ex = {}", ex.getMessage(), ex);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+			}
+		} catch (ResourceNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(orderId);
+		}
+	}
+
 	@PostMapping(value = "/orders/process/{orderId}")
 	public ResponseEntity<?> processOrder(@PathVariable Long orderId) {
 		Long storedMoveId = null;
@@ -134,7 +172,7 @@ public class ApiController {
 				moneyMove.setOrderId(order.getOrderId());
 				moneyMove.setAmount(order.getPrice().multiply(BigDecimal.valueOf(order.getQuantity())));
 				moneyMove.setMoveDt(new Date());
-				MoneyMove result = paymentClient.doPayment(order.getUserId(), moneyMove);
+				MoneyMove result = paymentClient.doPayment(order.getAccountId(), moneyMove);
 				storedMoveId = result.getMoveId();
 				logger.info("processOrder. result = {}", result);
 			} catch (FeignException ex) {
@@ -149,6 +187,7 @@ public class ApiController {
 				reserve.setAmount(order.getQuantity());
 				Reserve newReserve = warehouseClient.createReserve(reserve);
 				storedReserveID = newReserve.getReserveId();
+				order.setReserveId(newReserve.getReserveId());
 				logger.info("processOrder. reserve = {}", newReserve);
 			} catch (FeignException ex) {
 				logger.error("Warehouse error. ex ={}", ex.getMessage(), ex);
@@ -156,7 +195,7 @@ public class ApiController {
 				ReturnRequest returnRequest = new ReturnRequest();
 				returnRequest.setOrderId(order.getOrderId());
 				returnRequest.setReturnMoveId(storedMoveId);
-				paymentClient.returnPayment(order.getUserId(), returnRequest);
+				paymentClient.returnPayment(order.getAccountId(), returnRequest);
 				logger.info("payment returned(1)");
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 			}
@@ -175,7 +214,7 @@ public class ApiController {
 				ReturnRequest returnRequest = new ReturnRequest();
 				returnRequest.setOrderId(order.getOrderId());
 				returnRequest.setReturnMoveId(storedMoveId);
-				paymentClient.returnPayment(order.getUserId(), returnRequest);
+				paymentClient.returnPayment(order.getAccountId(), returnRequest);
 				logger.info("payment returned(2)");
 				// cancel Reserve
 				ShipmentRequest shipmentRequest = new ShipmentRequest();

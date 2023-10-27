@@ -9,9 +9,9 @@ import ru.sergdm.ws.clients.model.ReturnRequest;
 
 @FeignClient(name = "PaymentClient", url="${PAYMENTS_URL}:8010")
 public interface PaymentClient {
-	@RequestMapping(method = RequestMethod.POST, value = "/pay/{userId}", consumes = "application/json")
-	MoneyMove doPayment(@PathVariable("userId") Long userId, MoneyMove moneyMove);
+	@RequestMapping(method = RequestMethod.POST, value = "/pay/{accountId}", consumes = "application/json")
+	MoneyMove doPayment(@PathVariable("accountId") Long userId, MoneyMove moneyMove);
 
-	@RequestMapping(method = RequestMethod.POST, value = "/pay-return/{userId}", consumes = "application/json")
-	String returnPayment(@PathVariable("userId") Long userId, ReturnRequest returnRequest);
+	@RequestMapping(method = RequestMethod.POST, value = "/pay-return/{accountId}", consumes = "application/json")
+	String returnPayment(@PathVariable("accountId") Long userId, ReturnRequest returnRequest);
 }

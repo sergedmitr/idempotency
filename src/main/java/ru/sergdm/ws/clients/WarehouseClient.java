@@ -13,4 +13,7 @@ public interface WarehouseClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/cancel", consumes = "application/json")
 	String cancelRequest(ShipmentRequest shipmentRequest);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/ship", consumes = "application/json")
+	String shipRequest(ShipmentRequest shipmentRequest);
 }
